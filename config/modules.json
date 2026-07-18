@@ -1,0 +1,8 @@
+{
+    "modules": [
+        {
+            "name": "m00_test",
+            "enabled": true
+        }
+    ]
+}

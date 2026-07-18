@@ -1,0 +1,24 @@
+{
+    "accounts": [
+        {
+            "email": "test@mail.com",
+            "igg_ids": [
+                {
+                    "id": 123456,
+                    "characters": [
+                        {
+                            "id": 111,
+                            "nickname": "Milamoria",
+                            "enabled": true
+                        },
+                        {
+                            "id": 222,
+                            "nickname": "Farm1",
+                            "enabled": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

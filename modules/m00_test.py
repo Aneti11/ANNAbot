@@ -1,10 +1,10 @@
 from core.module import Module, ModuleResult
 
 
-class TestModule(Module):
+class M00Test(Module):
 
     def __init__(self):
-        super().__init__("TestModule")
+        super().__init__("M00Test")
 
 
     def run(self, state):
