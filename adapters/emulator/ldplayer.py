@@ -39,15 +39,15 @@ class LDPlayerAdapter:
 
                 path = Path(install_dir)
 
-                console = path / "dnconsole.exe"
+                for console_name in ("ldconsole.exe", "dnconsole.exe"):
+                    console = path / console_name
 
-                if console.exists():
-
-                    return EmulatorInstallation(
-                        path=path,
-                        console=console,
-                        executable=path / "dnplayer.exe",
-                        source="registry"
-                    )
+                    if console.exists():
+                        return EmulatorInstallation(
+                            path=path,
+                            console=console,
+                            executable=path / "dnplayer.exe",
+                            source="registry"
+                        )
 
         return None
