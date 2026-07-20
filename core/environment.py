@@ -1,4 +1,6 @@
 from adapters.emulator.ldplayer import LDPlayerAdapter
+from core.config_loader import ConfigLoader
+from pathlib import Path
 
 
 class EnvironmentManager:
@@ -28,9 +30,28 @@ class EnvironmentManager:
 
         print("[ENV] Checking environment")
 
+        settings = ConfigLoader.load_settings()
+
+        saved_path = settings["environment"]["emulator"]["path"]
+
+
+        if saved_path:
+
+            path = Path(saved_path)
+
+            if path.exists():
+
+                print(
+                    f"[ENV] LDPlayer from settings: {path}"
+                )
+
+                return True
+
+
         self.installation = (
             self.emulator.find_installation()
         )
+
 
         if self.installation:
 
@@ -38,6 +59,21 @@ class EnvironmentManager:
                 f"[ENV] LDPlayer found: "
                 f"{self.installation.path}"
             )
+
+
+            settings["environment"]["emulator"]["path"] = (
+                str(self.installation.path)
+            )
+
+            settings["environment"]["emulator"]["source"] = (
+                self.installation.source
+            )
+
+
+            ConfigLoader.save_settings(
+                settings
+            )
+
 
             return True
 

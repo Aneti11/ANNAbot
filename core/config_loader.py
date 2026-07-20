@@ -51,3 +51,33 @@ class ConfigLoader:
             )
 
         return accounts
+    
+    @staticmethod
+    def load_settings(path="config/settings.json"):
+
+        with open(
+            path,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            return json.load(file)
+    
+    @staticmethod
+    def save_settings(
+        settings,
+        path="config/settings.json"
+    ):
+
+        with open(
+            path,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                settings,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )

@@ -2,10 +2,9 @@
     "environment": {
         "emulator": {
             "type": "LDPlayer",
-            "path": "",
-            "source": ""
+            "path": "E:\\LDPlayer\\LDPlayer9",
+            "source": "registry"
         },
-
         "screen": {
             "width": 800,
             "height": 450,
