@@ -1,6 +1,7 @@
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from core.config_loader import ConfigLoader
 from pathlib import Path
+from models.emulator_installation import EmulatorInstallation
 
 
 class EnvironmentManager:
@@ -21,6 +22,7 @@ class EnvironmentManager:
         self.emulator = LDPlayerAdapter()
 
         self.installation = None
+        self.instance = None
 
 
     def check(self):
@@ -34,49 +36,74 @@ class EnvironmentManager:
 
         saved_path = settings["environment"]["emulator"]["path"]
 
+        installation = None
 
         if saved_path:
-
             path = Path(saved_path)
 
             if path.exists():
-
                 print(
-                    f"[ENV] LDPlayer from settings: {path}"
+                    f"[ENV] Using saved LDPlayer path: {path}"
                 )
 
-                return True
+                for console_name in ("ldconsole.exe", "dnconsole.exe"):
+                    console = path / console_name
 
+                    if console.exists():
+                        installation = EmulatorInstallation(
+                            path=path,
+                            console=console,
+                            executable=path / "dnplayer.exe",
+                            source=settings["environment"]["emulator"].get(
+                                "source",
+                                "settings"
+                            )
+                        )
+                        break
 
-        self.installation = (
-            self.emulator.find_installation()
-        )
+                if installation is None:
+                    print(
+                        "[ENV] Saved LDPlayer path is invalid, searching for installation"
+                    )
 
+        if installation is None:
+            print("[ENV] Searching LDPlayer installation")
+            installation = self.emulator.find_installation()
+
+            if installation:
+                settings["environment"]["emulator"]["path"] = (
+                    str(installation.path)
+                )
+
+                settings["environment"]["emulator"]["source"] = (
+                    installation.source
+                )
+
+                ConfigLoader.save_settings(
+                    settings
+                )
+
+        self.installation = installation
 
         if self.installation:
-
             print(
                 f"[ENV] LDPlayer found: "
                 f"{self.installation.path}"
             )
 
-
-            settings["environment"]["emulator"]["path"] = (
-                str(self.installation.path)
+            self.instance = self.emulator.find_instance(
+                "ANNAbot"
             )
 
-            settings["environment"]["emulator"]["source"] = (
-                self.installation.source
-            )
+            if self.instance:
+                print("[EMULATOR] Found instance: ANNAbot")
+                print(f"[EMULATOR] Index: {self.instance.index}")
+                print(f"[EMULATOR] Running: {self.instance.running}")
+                print("[STATE] Environment detected")
+                return True
 
-
-            ConfigLoader.save_settings(
-                settings
-            )
-
-
-            return True
-
+            print("[ERROR] ANNAbot instance not found")
+            return False
 
         print("[ENV] LDPlayer not found")
 
