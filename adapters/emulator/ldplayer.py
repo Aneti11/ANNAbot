@@ -1,6 +1,8 @@
+import subprocess
 from pathlib import Path
 
 from models.emulator_installation import EmulatorInstallation
+from models.emulator_instance import EmulatorInstance
 from core.platform.registry import (
     WindowsRegistry,
     CURRENT_USER,
@@ -49,5 +51,55 @@ class LDPlayerAdapter:
                             executable=path / "dnplayer.exe",
                             source="registry"
                         )
+
+        return None
+
+
+    def find_instance(self, name: str):
+        installation = self.find_installation()
+
+        if installation is None:
+            return None
+
+        console_path = installation.console
+
+        try:
+            result = subprocess.run(
+                [str(console_path), "list2"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return None
+
+        for line in result.stdout.splitlines():
+            line = line.strip()
+
+            if not line:
+                continue
+
+            parts = line.split(",")
+
+            if len(parts) < 3:
+                continue
+
+            instance_index = parts[0].strip()
+            instance_name = parts[1].strip()
+            running_flag = parts[2].strip()
+
+            if instance_name == name:
+                try:
+                    index = int(instance_index)
+                except ValueError:
+                    continue
+
+                running = running_flag != "0"
+
+                return EmulatorInstance(
+                    index=index,
+                    name=instance_name,
+                    running=running
+                )
 
         return None
