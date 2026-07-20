@@ -43,6 +43,10 @@ class Application:
 
         self.setup()
 
+        if not self.environment.check():
+            print("[ERROR] Environment not ready")
+            return
+
         self.context = ExecutionContext(
             self.session,
             self.game_state,
