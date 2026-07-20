@@ -103,3 +103,28 @@ class LDPlayerAdapter:
                 )
 
         return None
+
+
+    def start_instance(self, index: int):
+        installation = self.find_installation()
+
+        if installation is None:
+            return False
+
+        command = [
+            str(installation.console),
+            "launch",
+            "--index",
+            str(index)
+        ]
+
+        try:
+            subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
