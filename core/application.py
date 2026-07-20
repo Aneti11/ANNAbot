@@ -2,6 +2,7 @@ from core.dispatcher import Dispatcher
 from core.session import Session
 from core.character_manager import CharacterManager
 from core.config_loader import ConfigLoader
+from core.game_launcher import GameLauncher
 from core.module_loader import ModuleLoader
 from core.game_state import GameState
 from core.context import ExecutionContext
@@ -41,11 +42,20 @@ class Application:
 
 
     def start(self):
-
         self.setup()
 
         if not self.environment.check():
             Logger.error("Environment not ready")
+            return False
+
+        launcher = GameLauncher(
+            self.environment.installation,
+            self.environment.instance,
+            self.environment.game_package
+        )
+
+        if not launcher.launch():
+            Logger.error("Game launch failed")
             return False
 
         self.context = ExecutionContext(
@@ -57,6 +67,7 @@ class Application:
         )
 
         self.dispatcher.start()
+
         return True
 
 
