@@ -13,9 +13,10 @@ class Module(ABC):
     Базовый класс для всех модулей ANNAbot.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, module_type="user"):
         self.name = name
         self.enabled = True
+        self.module_type = module_type
 
     def can_run(self, state):
         """

@@ -1,0 +1,15 @@
+{
+    "environment": {
+        "emulator": {
+            "type": "LDPlayer",
+            "path": "",
+            "source": ""
+        },
+
+        "screen": {
+            "width": 800,
+            "height": 450,
+            "orientation": "landscape"
+        }
+    }
+}

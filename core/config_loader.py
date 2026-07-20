@@ -1,3 +1,4 @@
+from pathlib import Path
 import json
 
 from models.igg_account import IGGAccount
@@ -10,7 +11,9 @@ class ConfigLoader:
     @staticmethod
     def load_accounts(path="config/accounts.json"):
 
-        with open(path, "r", encoding="utf-8") as file:
+        path = Path(path)
+
+        with path.open("r", encoding="utf-8") as file:
             data = json.load(file)
 
         accounts = []

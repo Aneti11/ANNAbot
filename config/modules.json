@@ -1,7 +1,11 @@
 {
     "modules": [
         {
-            "name": "m00_test",
+            "name": "m0000_check_emulator",
+            "enabled": true
+        },
+        {
+            "name": "m0040_check_character",
             "enabled": true
         }
     ]

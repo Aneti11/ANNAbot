@@ -3,6 +3,10 @@ from core.session import Session
 from core.character_manager import CharacterManager
 from core.config_loader import ConfigLoader
 from core.module_loader import ModuleLoader
+from core.game_state import GameState
+from core.context import ExecutionContext
+from core.game import Game
+from core.environment import EnvironmentManager
 
 
 class Application:
@@ -10,6 +14,11 @@ class Application:
     def __init__(self):
         self.dispatcher = Dispatcher()
         self.session = Session()
+        self.game_state = GameState()
+        self.game = Game()
+        self.environment = EnvironmentManager()
+
+        self.context = None
 
         self.character_manager = None
 
@@ -34,6 +43,14 @@ class Application:
 
         self.setup()
 
+        self.context = ExecutionContext(
+            self.session,
+            self.game_state,
+            self.dispatcher.state_manager,
+            self.game,
+            self.environment
+        )
+
         self.dispatcher.start()
 
 
@@ -41,6 +58,6 @@ class Application:
 
         self.dispatcher.run_cycle(
             self.character_manager,
-            self.session,
+            self.context,
             cycles
         )

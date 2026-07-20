@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
+*.zip
+*.docx
 .vscode/
 logs/
 screenshots/
