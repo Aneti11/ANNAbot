@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.zip
 *.docx
+*.txt
 .vscode/
 logs/
 screenshots/

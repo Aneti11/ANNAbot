@@ -1,3 +1,4 @@
+from adapters.android.adb import ADBAdapter
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from core.config_loader import ConfigLoader
 from core.logger import Logger
@@ -21,6 +22,8 @@ class EnvironmentManager:
         self.connected = False
 
         self.emulator = LDPlayerAdapter()
+        self.adb = None
+        self.game_package = None
 
         self.installation = None
         self.instance = None
@@ -103,6 +106,7 @@ class EnvironmentManager:
 
                 if self.instance.running:
                     Logger.info("[STATE] Environment detected")
+                    self._prepare_android_layer(settings)
                     return True
 
                 Logger.info("[EMULATOR] Starting...")
@@ -113,6 +117,7 @@ class EnvironmentManager:
                 Logger.info("[EMULATOR] Waiting for startup...")
                 if self.emulator.wait_until_ready(self.instance.index):
                     Logger.info("[EMULATOR] Ready")
+                    self._prepare_android_layer(settings)
                     Logger.info("[STATE] Environment detected")
                     return True
 
@@ -146,4 +151,55 @@ class EnvironmentManager:
 
         self.connected = True
 
+        return True
+
+    def _prepare_android_layer(self, settings):
+        self.adb = ADBAdapter(self.installation)
+        self.game_package = settings["environment"].get(
+            "package_name",
+            ""
+        ).strip()
+
+        if not self.game_package:
+            Logger.info(
+                "[ADB] package_name is not configured; game launch will be skipped until the correct Android package is confirmed"
+            )
+
+        if self.adb.is_available(self.instance.index):
+            Logger.info("[ADB] Android device is available")
+        else:
+            Logger.warning(
+                "[ADB] Android device is not fully available. "
+                "LDPlayer runapp commands may still work."
+            )
+
+    def launch_game(self, package_name=None):
+        if self.installation is None or self.instance is None:
+            Logger.error("[ADB] No emulator instance available for game launch")
+            return False
+
+        if self.adb is None:
+            self.adb = ADBAdapter(self.installation)
+
+        package = package_name or self.game_package
+
+        if not package:
+            Logger.error(
+                "[ADB] No Android package name configured for game launch"
+            )
+            return False
+
+        Logger.info(f"[ADB] Launching game package: {package}")
+
+        result = self.adb.run_app(self.instance.index, package)
+
+        if result is None or result.returncode != 0:
+            stderr = result.stderr.strip() if result is not None else ""
+            Logger.error(
+                f"[ADB] Failed to launch {package}. "
+                f"{stderr}"
+            )
+            return False
+
+        Logger.info("[ADB] Launch request issued successfully")
         return True

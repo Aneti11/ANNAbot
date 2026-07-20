@@ -46,7 +46,7 @@ class Application:
 
         if not self.environment.check():
             Logger.error("Environment not ready")
-            return
+            return False
 
         self.context = ExecutionContext(
             self.session,
@@ -57,6 +57,7 @@ class Application:
         )
 
         self.dispatcher.start()
+        return True
 
 
     def run(self, cycles=5):

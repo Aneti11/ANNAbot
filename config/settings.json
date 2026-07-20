@@ -9,6 +9,7 @@
             "width": 800,
             "height": 450,
             "orientation": "landscape"
-        }
+        },
+        "package_name": ""
     }
 }

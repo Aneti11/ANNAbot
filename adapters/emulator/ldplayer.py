@@ -75,6 +75,8 @@ class LDPlayerAdapter:
         except (subprocess.CalledProcessError, FileNotFoundError):
             return None
 
+        running_instance = None
+
         for line in result.stdout.splitlines():
             line = line.strip()
 
@@ -92,24 +94,44 @@ class LDPlayerAdapter:
 
             Logger.debug(f"[LDPLAYER] list2 line: {parts}")
 
+            try:
+                index = int(instance_index)
+            except ValueError:
+                continue
+
+            if android_state == "1":
+                state = EmulatorInstance.RUNNING
+            elif android_state == "2":
+                state = EmulatorInstance.STARTING
+            else:
+                state = EmulatorInstance.STOPPED
+
             if instance_name == name:
-                try:
-                    index = int(instance_index)
-                except ValueError:
-                    continue
-
-                if android_state == "1":
-                    state = EmulatorInstance.RUNNING
-                elif android_state == "2":
-                    state = EmulatorInstance.STARTING
-                else:
-                    state = EmulatorInstance.STOPPED
-
                 return EmulatorInstance(
                     index=index,
                     name=instance_name,
                     state=state
                 )
+
+            if name.lower() in instance_name.lower():
+                return EmulatorInstance(
+                    index=index,
+                    name=instance_name,
+                    state=state
+                )
+
+            if state == EmulatorInstance.RUNNING and running_instance is None:
+                running_instance = EmulatorInstance(
+                    index=index,
+                    name=instance_name,
+                    state=state
+                )
+
+        if running_instance is not None:
+            Logger.warning(
+                f"[LDPLAYER] Instance '{name}' not found; falling back to running instance '{running_instance.name}'"
+            )
+            return running_instance
 
         return None
 
