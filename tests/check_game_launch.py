@@ -7,6 +7,7 @@ if str(root) not in sys.path:
 
 from core.config_loader import ConfigLoader
 from core.environment import EnvironmentManager
+from core.game_launcher import GameLauncher
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from adapters.android.adb import ADBAdapter
 
@@ -36,7 +37,13 @@ def main():
     print(f"Selected instance: {env.instance.name} (index={env.instance.index}, running={env.instance.running})")
     print(f"Configured package_name: '{env.game_package}'")
 
-    result = env.launch_game()
+    launcher = GameLauncher(
+        env.installation,
+        env.instance,
+        env.game_package
+    )
+
+    result = launcher.launch()
     print(f"launch_game result: {result}")
 
 

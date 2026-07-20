@@ -1,6 +1,7 @@
 from adapters.android.adb import ADBAdapter
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from core.config_loader import ConfigLoader
+from core.game_launcher import GameLauncher
 from core.logger import Logger
 from pathlib import Path
 from models.emulator_installation import EmulatorInstallation
@@ -174,32 +175,10 @@ class EnvironmentManager:
             )
 
     def launch_game(self, package_name=None):
-        if self.installation is None or self.instance is None:
-            Logger.error("[ADB] No emulator instance available for game launch")
-            return False
+        launcher = GameLauncher(
+            self.installation,
+            self.instance,
+            self.game_package
+        )
 
-        if self.adb is None:
-            self.adb = ADBAdapter(self.installation)
-
-        package = package_name or self.game_package
-
-        if not package:
-            Logger.error(
-                "[ADB] No Android package name configured for game launch"
-            )
-            return False
-
-        Logger.info(f"[ADB] Launching game package: {package}")
-
-        result = self.adb.run_app(self.instance.index, package)
-
-        if result is None or result.returncode != 0:
-            stderr = result.stderr.strip() if result is not None else ""
-            Logger.error(
-                f"[ADB] Failed to launch {package}. "
-                f"{stderr}"
-            )
-            return False
-
-        Logger.info("[ADB] Launch request issued successfully")
-        return True
+        return launcher.launch(package_name=package_name)
