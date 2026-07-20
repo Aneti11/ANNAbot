@@ -1,8 +1,10 @@
 import subprocess
+import time
 from pathlib import Path
 
 from models.emulator_installation import EmulatorInstallation
 from models.emulator_instance import EmulatorInstance
+from core.logger import Logger
 from core.platform.registry import (
     WindowsRegistry,
     CURRENT_USER,
@@ -81,12 +83,14 @@ class LDPlayerAdapter:
 
             parts = line.split(",")
 
-            if len(parts) < 3:
+            if len(parts) < 5:
                 continue
 
             instance_index = parts[0].strip()
             instance_name = parts[1].strip()
-            running_flag = parts[2].strip()
+            android_state = parts[4].strip()
+
+            Logger.debug(f"[LDPLAYER] list2 line: {parts}")
 
             if instance_name == name:
                 try:
@@ -94,12 +98,17 @@ class LDPlayerAdapter:
                 except ValueError:
                     continue
 
-                running = running_flag != "0"
+                if android_state == "1":
+                    state = EmulatorInstance.RUNNING
+                elif android_state == "2":
+                    state = EmulatorInstance.STARTING
+                else:
+                    state = EmulatorInstance.STOPPED
 
                 return EmulatorInstance(
                     index=index,
                     name=instance_name,
-                    running=running
+                    state=state
                 )
 
         return None
@@ -128,3 +137,51 @@ class LDPlayerAdapter:
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
+
+
+    def wait_until_ready(self, index: int, timeout: int = 60):
+        deadline = time.time() + timeout
+
+        while time.time() < deadline:
+            installation = self.find_installation()
+            if installation is None:
+                return False
+
+            try:
+                result = subprocess.run(
+                    [str(installation.console), "list2"],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                return False
+
+            for line in result.stdout.splitlines():
+                line = line.strip()
+
+                if not line:
+                    continue
+
+                parts = line.split(",")
+
+                if len(parts) < 5:
+                    continue
+
+                try:
+                    instance_index = int(parts[0].strip())
+                except ValueError:
+                    continue
+
+                if instance_index != index:
+                    continue
+
+                android_state = parts[4].strip()
+                if android_state == "1":
+                    return True
+                if android_state == "2":
+                    break
+
+            time.sleep(2)
+
+        return False

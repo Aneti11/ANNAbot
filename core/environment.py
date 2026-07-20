@@ -105,14 +105,18 @@ class EnvironmentManager:
                     Logger.info("[STATE] Environment detected")
                     return True
 
-                Logger.info("[EMULATOR] ANNAbot instance is stopped, starting it")
+                Logger.info("[EMULATOR] Starting...")
+                if not self.emulator.start_instance(self.instance.index):
+                    Logger.error("[ERROR] Failed to start ANNAbot instance")
+                    return False
 
-                if self.emulator.start_instance(self.instance.index):
-                    Logger.info("[EMULATOR] ANNAbot instance started")
+                Logger.info("[EMULATOR] Waiting for startup...")
+                if self.emulator.wait_until_ready(self.instance.index):
+                    Logger.info("[EMULATOR] Ready")
                     Logger.info("[STATE] Environment detected")
                     return True
 
-                Logger.error("[ERROR] Failed to start ANNAbot instance")
+                Logger.error("[ERROR] ANNAbot instance did not become ready")
                 return False
 
             Logger.error("[ERROR] ANNAbot instance not found")
