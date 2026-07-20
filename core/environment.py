@@ -1,5 +1,6 @@
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from core.config_loader import ConfigLoader
+from core.logger import Logger
 from pathlib import Path
 from models.emulator_installation import EmulatorInstallation
 
@@ -30,7 +31,7 @@ class EnvironmentManager:
         Проверка готовности окружения.
         """
 
-        print("[ENV] Checking environment")
+        Logger.info("[ENV] Checking environment")
 
         settings = ConfigLoader.load_settings()
 
@@ -42,7 +43,7 @@ class EnvironmentManager:
             path = Path(saved_path)
 
             if path.exists():
-                print(
+                Logger.info(
                     f"[ENV] Using saved LDPlayer path: {path}"
                 )
 
@@ -62,12 +63,12 @@ class EnvironmentManager:
                         break
 
                 if installation is None:
-                    print(
+                    Logger.warning(
                         "[ENV] Saved LDPlayer path is invalid, searching for installation"
                     )
 
         if installation is None:
-            print("[ENV] Searching LDPlayer installation")
+            Logger.info("[ENV] Searching LDPlayer installation")
             installation = self.emulator.find_installation()
 
             if installation:
@@ -86,7 +87,7 @@ class EnvironmentManager:
         self.installation = installation
 
         if self.installation:
-            print(
+            Logger.info(
                 f"[ENV] LDPlayer found: "
                 f"{self.installation.path}"
             )
@@ -96,16 +97,16 @@ class EnvironmentManager:
             )
 
             if self.instance:
-                print("[EMULATOR] Found instance: ANNAbot")
-                print(f"[EMULATOR] Index: {self.instance.index}")
-                print(f"[EMULATOR] Running: {self.instance.running}")
-                print("[STATE] Environment detected")
+                Logger.info("[EMULATOR] Found instance: ANNAbot")
+                Logger.info(f"[EMULATOR] Index: {self.instance.index}")
+                Logger.info(f"[EMULATOR] Running: {self.instance.running}")
+                Logger.info("[STATE] Environment detected")
                 return True
 
-            print("[ERROR] ANNAbot instance not found")
+            Logger.error("[ERROR] ANNAbot instance not found")
             return False
 
-        print("[ENV] LDPlayer not found")
+        Logger.error("[ENV] LDPlayer not found")
 
         return False
 
@@ -115,7 +116,7 @@ class EnvironmentManager:
         Запуск окружения.
         """
 
-        print("[ENV] Starting environment")
+        Logger.info("[ENV] Starting environment")
 
         return True
 
@@ -125,7 +126,7 @@ class EnvironmentManager:
         Подключение к окружению.
         """
 
-        print("[ENV] Connecting environment")
+        Logger.info("[ENV] Connecting environment")
 
         self.connected = True
 

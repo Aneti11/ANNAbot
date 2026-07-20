@@ -7,6 +7,7 @@ from core.game_state import GameState
 from core.context import ExecutionContext
 from core.game import Game
 from core.environment import EnvironmentManager
+from core.logger import Logger
 
 
 class Application:
@@ -44,7 +45,7 @@ class Application:
         self.setup()
 
         if not self.environment.check():
-            print("[ERROR] Environment not ready")
+            Logger.error("Environment not ready")
             return
 
         self.context = ExecutionContext(
