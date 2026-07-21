@@ -1,6 +1,7 @@
 from adapters.android.adb import ADBAdapter
 from adapters.emulator.ldplayer import LDPlayerAdapter
 from core.config_loader import ConfigLoader
+from core.environment_validator import EnvironmentValidator
 from core.game_launcher import GameLauncher
 from core.logger import Logger
 from pathlib import Path
@@ -104,6 +105,16 @@ class EnvironmentManager:
                 Logger.info("[EMULATOR] Found instance: ANNAbot")
                 Logger.info(f"[EMULATOR] Index: {self.instance.index}")
                 Logger.info(f"[EMULATOR] Running: {self.instance.running}")
+
+                validator = EnvironmentValidator(
+                    installation=self.installation,
+                    instance=self.instance
+                )
+                settings_result = validator.validate_settings()
+
+                if not settings_result.valid:
+                    Logger.error("ANNAbot stopped due to invalid LDPlayer settings.")
+                    return False
 
                 if self.instance.running:
                     Logger.info("[STATE] Environment detected")

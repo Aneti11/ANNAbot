@@ -119,31 +119,50 @@ class ADBAdapter:
             return None
 
     def wait_until_ready(self, index: int, timeout: int = 120):
-        devices = self.get_devices(index)
+        deadline = time.time() + timeout
 
-        if not any(device["state"] == "device" for device in devices):
-            Logger.warning(
-                f"[ADB] Device {index} is not online. Current devices: {devices}"
+        while time.time() < deadline:
+            devices = self.get_devices(index)
+
+            online_device = next(
+                (device for device in devices if device["state"] == "device"),
+                None
             )
-            return False
 
-        response = self.shell_command(
-            index,
-            ["getprop", "sys.boot_completed"],
-            timeout=10
-        )
+            if online_device is None:
+                Logger.debug(
+                    f"[ADB] Waiting for device {index} to appear. "
+                    f"Current devices: {devices}"
+                )
+                time.sleep(2)
+                continue
 
-        if response is None or response.returncode != 0:
-            Logger.warning(
-                f"[ADB] Failed to read boot status for device {index}."
+            response = self.shell_command(
+                index,
+                ["getprop", "sys.boot_completed"],
+                timeout=10
             )
-            return False
 
-        if response.stdout.strip() == "1":
-            Logger.info(f"[ADB] Device {index} booted")
-            return True
+            if response is None or response.returncode != 0:
+                Logger.debug(
+                    f"[ADB] Failed to read boot status for device {index}. "
+                    "Retrying until timeout."
+                )
+                time.sleep(2)
+                continue
 
-        Logger.debug(
-            f"[ADB] Device {index} is online but boot not complete: {response.stdout.strip()}"
+            if response.stdout.strip() == "1":
+                Logger.info(f"[ADB] Device {index} booted")
+                return True
+
+            Logger.debug(
+                f"[ADB] Device {index} is online but boot not complete: "
+                f"{response.stdout.strip()}"
+            )
+            time.sleep(2)
+
+        Logger.error(
+            f"[ADB] Timeout waiting for device {index} to become ready "
+            f"after {timeout} seconds."
         )
         return False

@@ -2,6 +2,7 @@ import subprocess
 import time
 from pathlib import Path
 
+from adapters.emulator.ldplayer_config import LDPlayerConfigReader
 from models.emulator_installation import EmulatorInstallation
 from models.emulator_instance import EmulatorInstance
 from core.logger import Logger
@@ -85,12 +86,12 @@ class LDPlayerAdapter:
 
             parts = line.split(",")
 
-            if len(parts) < 5:
+            if len(parts) < 2:
                 continue
 
             instance_index = parts[0].strip()
             instance_name = parts[1].strip()
-            android_state = parts[4].strip()
+            android_state = parts[4].strip() if len(parts) >= 5 else "0"
 
             Logger.debug(f"[LDPLAYER] list2 line: {parts}")
 
@@ -134,6 +135,18 @@ class LDPlayerAdapter:
             return running_instance
 
         return None
+
+    def get_instance_config(self, installation: EmulatorInstallation, index: int):
+        config = LDPlayerConfigReader.read_instance_config(
+            installation,
+            index
+        )
+
+        Logger.debug(
+            f"[LDPLAYER] instance config for index {index}: {config}"
+        )
+
+        return config
 
 
     def start_instance(self, index: int):

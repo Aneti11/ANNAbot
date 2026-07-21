@@ -1,4 +1,5 @@
 from core.dispatcher import Dispatcher
+from core.environment_validator import EnvironmentValidator
 from core.session import Session
 from core.character_manager import CharacterManager
 from core.config_loader import ConfigLoader
@@ -46,6 +47,18 @@ class Application:
 
         if not self.environment.check():
             Logger.error("Environment not ready")
+            return False
+
+        validator = EnvironmentValidator(
+            installation=self.environment.installation,
+            instance=self.environment.instance,
+            adb_adapter=self.environment.adb
+        )
+
+        validation_result = validator.validate_runtime()
+
+        if not validation_result.valid:
+            Logger.error("ANNAbot stopped.")
             return False
 
         launcher = GameLauncher(
