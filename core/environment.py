@@ -166,14 +166,6 @@ class EnvironmentManager:
                 "[ADB] package_name is not configured; game launch will be skipped until the correct Android package is confirmed"
             )
 
-        if self.adb.is_available(self.instance.index):
-            Logger.info("[ADB] Android device is available")
-        else:
-            Logger.warning(
-                "[ADB] Android device is not fully available. "
-                "LDPlayer runapp commands may still work."
-            )
-
     def launch_game(self, package_name=None):
         launcher = GameLauncher(
             self.installation,
